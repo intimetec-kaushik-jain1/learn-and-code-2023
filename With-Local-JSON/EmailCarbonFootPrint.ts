@@ -1,3 +1,4 @@
+// With Local JSON use :
 class EmailCarbonFootprint {
   constructor(emailAddress, spamCount, sentCount, inboxCount) {
     this.emailAddress = emailAddress;
@@ -17,7 +18,7 @@ class EmailCarbonFootprint {
   }
 
   printCarbonFootprint() {
-    console.log("-------------OUTPUT--------");
+    console.log("-------------OUTPUT-------------");
     const domain = this.getEmailDomain();
     if (domain !== "Invalid Domain") {
       const inboxCarbonCount = (this.inboxCount * 0.3) / 1000;
@@ -29,9 +30,9 @@ class EmailCarbonFootprint {
       console.log("Inbox: " + inboxCarbonCount + "KG");
       console.log("Sent: " + sentCarbonCount + "KG");
       console.log("Spam: " + spamCarbonCount + "KG");
-      console.log("Total Consuption : " + totalCarbonCount + "KG");
+      console.log("Total Consumption : " + totalCarbonCount + "KG");
     } else {
-      console.log("Invalid email1");
+      console.log("Invalid email");
     }
   }
 }
@@ -42,42 +43,52 @@ class ServerCarbonFootprint {
   }
 
   printCarbonFootprint() {
-    console.log("-------------OUTPUT--------");
+    console.log("-------------OUTPUT-------------");
     console.log("Total: " + this.numberOfEmailsProcessed * 0.02 + "KWH");
   }
 }
 
-function main() {
-  const entityType = prompt(
-    "Kindly specify the entity type (Email/Server)"
-  ).toLowerCase();
+const userInfo = [
+  {
+    email: "kaushikjain@gmail.com",
+    inbox: 221,
+    spam: 67,
+    sent: 29,
+  },
+  {
+    email: "mukul@yahoo.com",
+    inbox: 129,
+    spam: 135,
+    sent: 10,
+  },
+  {
+    email: "arihant@outlook.com",
+    inbox: 223,
+    spam: 56,
+    sent: 98,
+  },
+];
 
-  if (entityType === "email") {
-    const emailAddress = prompt("Enter Email Address: ") || "";
-    const spamCount = parseInt(
-      prompt("Enter the number of Spam mails: ") || "0"
-    );
-    const inboxCount = parseInt(
-      prompt("Enter the number of Inbox mails: ") || "0"
-    );
-    const sentCount = parseInt(
-      prompt("Enter the number of Sent mails: ") || "0"
-    );
-    const entity = new EmailCarbonFootprint(
-      emailAddress,
-      spamCount,
-      sentCount,
-      inboxCount
-    );
-    entity.printCarbonFootprint();
-  } else if (entityType === "server") {
-    const numberOfEmailsProcessed = parseInt(
-      prompt("Enter Number of Emails: ") || "0"
-    );
-    const entity = new ServerCarbonFootprint(numberOfEmailsProcessed);
-    entity.printCarbonFootprint();
-  } else {
-    console.log("Invalid Input");
+function main() {
+  for (const user of userInfo) {
+    const emailAddress = user.email;
+    const spamCount = user.spam;
+    const inboxCount = user.inbox;
+    const sentCount = user.sent;
+
+    if (emailAddress.includes("@")) {
+      const entity = new EmailCarbonFootprint(
+        emailAddress,
+        spamCount,
+        sentCount,
+        inboxCount
+      );
+      entity.printCarbonFootprint();
+    } else {
+      const numberOfEmailsProcessed = user.inbox + user.sent + user.spam;
+      const entity = new ServerCarbonFootprint(numberOfEmailsProcessed);
+      entity.printCarbonFootprint();
+    }
   }
 }
 
