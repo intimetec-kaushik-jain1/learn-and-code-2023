@@ -78,12 +78,26 @@ var UserCarbonFootprint = /** @class */ (function () {
     return UserCarbonFootprint;
 }());
 var ServerCarbonFootprint = /** @class */ (function () {
-    function ServerCarbonFootprint(numberOfEmail) {
-        this.numberOfEmail = numberOfEmail;
+    function ServerCarbonFootprint() {
     }
+    ServerCarbonFootprint.prototype.setEmailNumber = function (numberOfEmail) {
+        this.numberOfEmail = numberOfEmail;
+    };
     ServerCarbonFootprint.prototype.printServerCarbonFootprint = function () {
         console.log('-------------OUTPUT-------------');
         console.log('Total Server Carbon Footprint: ' + this.numberOfEmail * 0.02 + 'KG');
+    };
+    ServerCarbonFootprint.prototype.getNumberOfEmailForServer = function () {
+        var emailCountInputInterface = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        return new Promise(function (resolve) {
+            emailCountInputInterface.question('Enter number of emails: ', function (numberOfEmail) {
+                emailCountInputInterface.close();
+                resolve(Number(numberOfEmail));
+            });
+        });
     };
     return ServerCarbonFootprint;
 }());
@@ -108,12 +122,12 @@ function getAccessToken(oAuth2Client, callback) {
         scope: SCOPES,
     });
     console.log('Visit this URL to authorize the app:', authUrl);
-    var rl = readline.createInterface({
+    var userInputInterface = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
     });
-    rl.question('Enter the code from the page here: ', function (code) {
-        rl.close();
+    userInputInterface.question('Enter the code from the page here: ', function (code) {
+        userInputInterface.close();
         oAuth2Client.getToken(code, function (error, token) {
             if (error) {
                 console.error('Error retrieving access token:', error);
@@ -169,10 +183,39 @@ function fetchAndPrintEmailCarbonFootprint(auth) {
     });
 }
 function CarbonFootprint() {
-    fs.readFile('credentials.json', function (error, credentials) {
-        if (error)
-            return console.error('Error loading client secret file:', error);
-        authorize(JSON.parse(credentials.toString()), fetchAndPrintEmailCarbonFootprint);
+    var _this = this;
+    var TypeInputInterface = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
     });
+    TypeInputInterface.question('Enter Type (Email/Server): ', function (type) { return __awaiter(_this, void 0, void 0, function () {
+        var serverCarbonFootprint, numberOfEmail;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    TypeInputInterface.close();
+                    if (!(type === 'Email')) return [3 /*break*/, 1];
+                    fs.readFile('credentials.json', function (error, credentials) {
+                        if (error)
+                            return console.error('Error loading client secret file:', error);
+                        authorize(JSON.parse(credentials.toString()), fetchAndPrintEmailCarbonFootprint);
+                    });
+                    return [3 /*break*/, 4];
+                case 1:
+                    if (!(type === 'Server')) return [3 /*break*/, 3];
+                    serverCarbonFootprint = new ServerCarbonFootprint();
+                    return [4 /*yield*/, serverCarbonFootprint.getNumberOfEmailForServer()];
+                case 2:
+                    numberOfEmail = _a.sent();
+                    serverCarbonFootprint.setEmailNumber(numberOfEmail);
+                    serverCarbonFootprint.printServerCarbonFootprint();
+                    return [3 /*break*/, 4];
+                case 3:
+                    console.log('Incorrect Input');
+                    _a.label = 4;
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); });
 }
 CarbonFootprint();

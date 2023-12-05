@@ -51,13 +51,27 @@ class UserCarbonFootprint {
 class ServerCarbonFootprint {
   numberOfEmail: number;
 
-  constructor(numberOfEmail: number) {
+  setEmailNumber(numberOfEmail: number) {
     this.numberOfEmail = numberOfEmail;
   }
 
   printServerCarbonFootprint(): void {
     console.log('-------------OUTPUT-------------');
     console.log('Total Server Carbon Footprint: ' + this.numberOfEmail * 0.02 + 'KG');
+  }
+
+  getNumberOfEmailForServer(): Promise<number> {
+    const emailCountInputInterface = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+  
+    return new Promise<number>((resolve) => {
+      emailCountInputInterface.question('Enter number of emails: ', (numberOfEmail) => {
+        emailCountInputInterface.close();
+        resolve(Number(numberOfEmail));
+      });
+    });
   }
 }
 
@@ -71,7 +85,7 @@ function authorize(credentials, callback) {
     oAuth2Client.setCredentials(JSON.parse(token.toString()));
     callback(oAuth2Client);
   } catch (error) {
-    getAccessToken(oAuth2Client, (callback)=>{
+    getAccessToken(oAuth2Client, (callback: any)=>{
       console.log(callback);
     });
   }
@@ -85,14 +99,14 @@ function getAccessToken(oAuth2Client, callback) {
 
   console.log('Visit this URL to authorize the app:', authUrl);
 
-  const rl = readline.createInterface({
+  const userInputInterface = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
-  rl.question('Enter the code from the page here: ', (code) => {
-    rl.close();
-    oAuth2Client.getToken(code, (error, token) => {
+  userInputInterface.question('Enter the code from the page here: ', (code: any) => {
+    userInputInterface.close();
+    oAuth2Client.getToken(code, (error : Error, token: any) => {
       if (error) {
         console.error('Error retrieving access token:', error);
         return;
@@ -137,10 +151,28 @@ async function fetchAndPrintEmailCarbonFootprint(auth: any): Promise<void> {
 }
 
 function CarbonFootprint(): void {
-  fs.readFile('credentials.json', (error, credentials) => {
-    if (error) return console.error('Error loading client secret file:', error);
-
-    authorize(JSON.parse(credentials.toString()), fetchAndPrintEmailCarbonFootprint);
+  const typeInputInterface = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  typeInputInterface.question('Enter Type (Email/Server): ', async (type: string) => {
+    typeInputInterface.close();
+    if(type.toLowerCase()=== 'email'){
+      fs.readFile('credentials.json', (error: any, credentials: { toString: () => string; }) => {
+        if (error) return console.error('Error loading client secret file:', error);
+    
+        authorize(JSON.parse(credentials.toString()), fetchAndPrintEmailCarbonFootprint);
+      });
+    }
+    else if(type.toLowerCase() === 'Server'){
+      const serverCarbonFootprint = new ServerCarbonFootprint();
+      const numberOfEmail = await serverCarbonFootprint.getNumberOfEmailForServer();
+      serverCarbonFootprint.setEmailNumber(numberOfEmail);
+      serverCarbonFootprint.printServerCarbonFootprint();
+    }
+    else{
+      console.log('Incorrect Input, Please Try Again!')
+    }
   });
 }
 
