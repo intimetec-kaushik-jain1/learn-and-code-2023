@@ -34,188 +34,331 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var google = require('googleapis').google;
-var readline = require('readline');
-var fs = require('fs');
-var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
-var UserCarbonFootprint = /** @class */ (function () {
-    function UserCarbonFootprint(emailAddress, spamEmailCount, sentEmailCount, inboxEmailCount) {
-        this.inboxCarbonEmissionRate = 0.3;
-        this.sentCarbonEmissionRate = 0.3;
-        this.spamCarbonEmissionRate = 0.03;
-        this.emailAddress = emailAddress;
-        this.spamEmailCount = spamEmailCount;
-        this.sentEmailCount = sentEmailCount;
-        this.inboxEmailCount = inboxEmailCount;
+var google = require("googleapis").google;
+var readline = require("readline");
+var fs = require("fs");
+var SCOPES = [
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/gmail.labels",
+];
+var GmailLabelCounter = /** @class */ (function () {
+    function GmailLabelCounter() {
     }
-    UserCarbonFootprint.prototype.getEmailDomain = function () {
-        var _a;
-        var emailDomain = (_a = this.emailAddress.split('@')[1]) === null || _a === void 0 ? void 0 : _a.split('.')[0];
-        var validDomains = ['gmail', 'outlook', 'yahoo'];
-        if (validDomains.includes(emailDomain)) {
-            return emailDomain;
-        }
-        return 'Invalid Domain';
-    };
-    UserCarbonFootprint.prototype.printUserCarbonFootprint = function () {
-        console.log('-------------OUTPUT-------------');
-        var emailDomain = this.getEmailDomain();
-        if (emailDomain !== 'Invalid Domain') {
-            var inboxCarbonFootprint = (this.inboxEmailCount * this.inboxCarbonEmissionRate) / 1000;
-            var sentCarbonFootprint = (this.sentEmailCount * this.sentCarbonEmissionRate) / 1000;
-            var spamCarbonFootprint = (this.spamEmailCount * this.spamCarbonEmissionRate) / 1000;
-            var totalCarbonFootprint = inboxCarbonFootprint + sentCarbonFootprint + spamCarbonFootprint;
-            console.log('Domain: ' + emailDomain);
-            console.log('Inbox Carbon Footprint: ' + inboxCarbonFootprint + ' KG');
-            console.log('Sent Carbon Footprint: ' + sentCarbonFootprint + ' KG');
-            console.log('Spam Carbon Footprint: ' + spamCarbonFootprint + ' KG');
-            console.log('Total Consumption: ' + totalCarbonFootprint + ' KG');
-        }
-        else {
-            console.log('Invalid email');
-        }
-    };
-    return UserCarbonFootprint;
-}());
-var ServerCarbonFootprint = /** @class */ (function () {
-    function ServerCarbonFootprint() {
-    }
-    ServerCarbonFootprint.prototype.setEmailNumber = function (numberOfEmail) {
-        this.numberOfEmail = numberOfEmail;
-    };
-    ServerCarbonFootprint.prototype.printServerCarbonFootprint = function () {
-        console.log('-------------OUTPUT-------------');
-        console.log('Total Server Carbon Footprint: ' + this.numberOfEmail * 0.02 + 'KG');
-    };
-    ServerCarbonFootprint.prototype.getNumberOfEmailForServer = function () {
-        var emailCountInputInterface = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-        return new Promise(function (resolve) {
-            emailCountInputInterface.question('Enter number of emails: ', function (numberOfEmail) {
-                emailCountInputInterface.close();
-                resolve(Number(numberOfEmail));
+    GmailLabelCounter.getCount = function (gmail, labelId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        gmail.users.labels.get({
+                            userId: "me",
+                            id: labelId,
+                        }, function (error, labelResponse) {
+                            if (error) {
+                                reject("Error retrieving ".concat(labelId, " label: ").concat(error.message));
+                            }
+                            else {
+                                var label = labelResponse === null || labelResponse === void 0 ? void 0 : labelResponse.data;
+                                if (label && label.messagesTotal !== undefined) {
+                                    resolve(label.messagesTotal);
+                                }
+                                else {
+                                    reject("Label or messagesTotal is undefined");
+                                }
+                            }
+                        });
+                    })];
             });
         });
     };
-    return ServerCarbonFootprint;
+    return GmailLabelCounter;
 }());
-function authorize(credentials, callback) {
-    var _a = credentials.web, client_secret = _a.client_secret, client_id = _a.client_id, redirect_uris = _a.redirect_uris;
-    var oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-    var tokenPath = 'token.json';
-    try {
-        var token = fs.readFileSync(tokenPath);
-        oAuth2Client.setCredentials(JSON.parse(token.toString()));
-        callback(oAuth2Client);
+var EmailCarbonFootprintCalculator = /** @class */ (function () {
+    function EmailCarbonFootprintCalculator() {
     }
-    catch (error) {
-        getAccessToken(oAuth2Client, function (callback) {
-            console.log(callback);
+    EmailCarbonFootprintCalculator.calculate = function (inboxCount, sentCount, spamCount) {
+        var inboxEmissionRate = 0.3;
+        var sentEmissionRate = 0.3;
+        var spamEmissionRate = 0.03;
+        var inboxCarbonFootprint = (inboxCount * inboxEmissionRate) / 1000;
+        var sentCarbonFootprint = (sentCount * sentEmissionRate) / 1000;
+        var spamCarbonFootprint = (spamCount * spamEmissionRate) / 1000;
+        return inboxCarbonFootprint + sentCarbonFootprint + spamCarbonFootprint;
+    };
+    return EmailCarbonFootprintCalculator;
+}());
+var EmailCarbonFootprintPrinter = /** @class */ (function () {
+    function EmailCarbonFootprintPrinter() {
+    }
+    EmailCarbonFootprintPrinter.printData = function (emailData) {
+        console.log("-------------OUTPUT-------------");
+        var emailDomain = EmailCarbonFootprintPrinter.extractEmailDomain(emailData.emailAddress);
+        if (emailDomain !== "Invalid Domain") {
+            EmailCarbonFootprintPrinter.printValidEmailData(emailData, emailDomain);
+        }
+        else {
+            EmailCarbonFootprintPrinter.printInvalidEmail();
+        }
+    };
+    EmailCarbonFootprintPrinter.printValidEmailData = function (emailData, emailDomain) {
+        var totalCarbonFootprint = EmailCarbonFootprintCalculator.calculate(emailData.inboxEmailCount, emailData.sentEmailCount, emailData.spamEmailCount);
+        console.log("Domain: " + emailDomain);
+        console.log("Inbox Carbon Footprint: " +
+            (emailData.inboxEmailCount * 0.3) / 1000 +
+            " KG");
+        console.log("Sent Carbon Footprint: " +
+            (emailData.sentEmailCount * 0.3) / 1000 +
+            " KG");
+        console.log("Spam Carbon Footprint: " +
+            (emailData.spamEmailCount * 0.03) / 1000 +
+            " KG");
+        console.log("Total Consumption: " + totalCarbonFootprint + " KG");
+    };
+    EmailCarbonFootprintPrinter.printInvalidEmail = function () {
+        console.log("Invalid email");
+    };
+    EmailCarbonFootprintPrinter.extractEmailDomain = function (emailAddress) {
+        var _a;
+        var emailDomain = (_a = emailAddress.split("@")[1]) === null || _a === void 0 ? void 0 : _a.split(".")[0];
+        var validDomains = ["gmail", "outlook", "yahoo"];
+        if (validDomains.includes(emailDomain)) {
+            return emailDomain;
+        }
+        return "Invalid Domain";
+    };
+    return EmailCarbonFootprintPrinter;
+}());
+var ServerCarbonFootprintCalculator = /** @class */ (function () {
+    function ServerCarbonFootprintCalculator() {
+    }
+    ServerCarbonFootprintCalculator.calculate = function (numberOfEmail) {
+        return numberOfEmail * 0.02;
+    };
+    return ServerCarbonFootprintCalculator;
+}());
+var ServerCarbonFootprintPrinter = /** @class */ (function () {
+    function ServerCarbonFootprintPrinter() {
+    }
+    ServerCarbonFootprintPrinter.printData = function (numberOfEmail) {
+        console.log("-------------OUTPUT-------------");
+        console.log("Total Server Carbon Footprint: " +
+            ServerCarbonFootprintCalculator.calculate(numberOfEmail) +
+            " KG");
+    };
+    return ServerCarbonFootprintPrinter;
+}());
+var ServerEmailInputHandler = /** @class */ (function () {
+    function ServerEmailInputHandler() {
+    }
+    ServerEmailInputHandler.getNumberOfEmail = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var emailCountInputInterface;
+            return __generator(this, function (_a) {
+                emailCountInputInterface = readline.createInterface({
+                    input: process.stdin,
+                    output: process.stdout,
+                });
+                return [2 /*return*/, new Promise(function (resolve) {
+                        emailCountInputInterface.question("Enter number of emails: ", function (numberOfEmail) {
+                            emailCountInputInterface.close();
+                            resolve(Number(numberOfEmail));
+                        });
+                    })];
+            });
         });
+    };
+    return ServerEmailInputHandler;
+}());
+var GmailAuthenticator = /** @class */ (function () {
+    function GmailAuthenticator() {
     }
-}
-function getAccessToken(oAuth2Client, callback) {
-    var authUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-    });
-    console.log('Visit this URL to authorize the app:', authUrl);
-    var userInputInterface = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-    userInputInterface.question('Enter the code from the page here: ', function (code) {
-        userInputInterface.close();
-        oAuth2Client.getToken(code, function (error, token) {
-            if (error) {
-                console.error('Error retrieving access token:', error);
-                return;
-            }
-            oAuth2Client.setCredentials(token);
-            fs.writeFileSync('token.json', JSON.stringify(token));
+    GmailAuthenticator.authorize = function (credentials, callback) {
+        var _a = credentials.web, client_secret = _a.client_secret, client_id = _a.client_id, redirect_uris = _a.redirect_uris;
+        var oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+        var tokenPath = "token.json";
+        try {
+            var token = fs.readFileSync(tokenPath);
+            oAuth2Client.setCredentials(JSON.parse(token.toString()));
             callback(oAuth2Client);
+        }
+        catch (error) {
+            GmailAuthenticator.getAccessToken(oAuth2Client, function (auth) {
+                callback(auth);
+            });
+        }
+    };
+    GmailAuthenticator.getAccessToken = function (oAuth2Client, callback) {
+        var authUrl = oAuth2Client.generateAuthUrl({
+            access_type: "offline",
+            scope: SCOPES,
         });
-    });
-}
-function getEmailLabelCount(gmail, labelId) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve, reject) {
-                    gmail.users.labels.get({
-                        userId: 'me',
-                        id: labelId,
-                    }, function (error, res) {
-                        if (error) {
-                            reject("Error retrieving ".concat(labelId, " label: ").concat(error.message));
-                        }
-                        else {
-                            var label = res.data;
-                            resolve(label.messagesTotal);
-                        }
-                    });
-                })];
+        console.log("Visit this URL to authorize the app:", authUrl);
+        var userInputInterface = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
         });
-    });
-}
-function fetchAndPrintEmailCarbonFootprint(auth) {
-    return __awaiter(this, void 0, void 0, function () {
-        var gmail, inboxEmailCount, sentEmailCount, spamEmailCount, userCarbonFootprint;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    gmail = google.gmail({ version: 'v1', auth: auth });
-                    return [4 /*yield*/, getEmailLabelCount(gmail, 'INBOX')];
-                case 1:
-                    inboxEmailCount = _a.sent();
-                    return [4 /*yield*/, getEmailLabelCount(gmail, 'SENT')];
-                case 2:
-                    sentEmailCount = _a.sent();
-                    return [4 /*yield*/, getEmailLabelCount(gmail, 'SPAM')];
-                case 3:
-                    spamEmailCount = _a.sent();
-                    userCarbonFootprint = new UserCarbonFootprint('kaushikjain1111@gmail.com', spamEmailCount, sentEmailCount, inboxEmailCount);
-                    userCarbonFootprint.printUserCarbonFootprint();
-                    return [2 /*return*/];
-            }
+        userInputInterface.question("Enter the code from the page here: ", function (code) {
+            userInputInterface.close();
+            oAuth2Client.getToken(code, function (error, token) {
+                if (error) {
+                    console.error("Error retrieving access token:", error);
+                    return;
+                }
+                oAuth2Client.setCredentials(token);
+                fs.writeFileSync("token.json", JSON.stringify(token));
+                callback(oAuth2Client);
+            });
         });
-    });
-}
-function CarbonFootprint() {
-    var _this = this;
-    var TypeInputInterface = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-    TypeInputInterface.question('Enter Type (Email/Server): ', function (type) { return __awaiter(_this, void 0, void 0, function () {
-        var serverCarbonFootprint, numberOfEmail;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    TypeInputInterface.close();
-                    if (!(type === 'Email')) return [3 /*break*/, 1];
-                    fs.readFile('credentials.json', function (error, credentials) {
-                        if (error)
-                            return console.error('Error loading client secret file:', error);
-                        authorize(JSON.parse(credentials.toString()), fetchAndPrintEmailCarbonFootprint);
-                    });
-                    return [3 /*break*/, 4];
-                case 1:
-                    if (!(type === 'Server')) return [3 /*break*/, 3];
-                    serverCarbonFootprint = new ServerCarbonFootprint();
-                    return [4 /*yield*/, serverCarbonFootprint.getNumberOfEmailForServer()];
-                case 2:
-                    numberOfEmail = _a.sent();
-                    serverCarbonFootprint.setEmailNumber(numberOfEmail);
-                    serverCarbonFootprint.printServerCarbonFootprint();
-                    return [3 /*break*/, 4];
-                case 3:
-                    console.log('Incorrect Input');
-                    _a.label = 4;
-                case 4: return [2 /*return*/];
-            }
+    };
+    return GmailAuthenticator;
+}());
+var CarbonFootprintManager = /** @class */ (function () {
+    function CarbonFootprintManager() {
+    }
+    CarbonFootprintManager.fetchAndPrintEmailCarbonFootprint = function (auth) {
+        return __awaiter(this, void 0, void 0, function () {
+            var gmail, inboxEmailCount, sentEmailCount, spamEmailCount, emailData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        gmail = google.gmail({ version: "v1", auth: auth });
+                        return [4 /*yield*/, GmailLabelCounter.getCount(gmail, "INBOX")];
+                    case 1:
+                        inboxEmailCount = _a.sent();
+                        return [4 /*yield*/, GmailLabelCounter.getCount(gmail, "SENT")];
+                    case 2:
+                        sentEmailCount = _a.sent();
+                        return [4 /*yield*/, GmailLabelCounter.getCount(gmail, "SPAM")];
+                    case 3:
+                        spamEmailCount = _a.sent();
+                        emailData = {
+                            emailAddress: "kaushikjain67890@gmail.com",
+                            inboxEmailCount: inboxEmailCount,
+                            sentEmailCount: sentEmailCount,
+                            spamEmailCount: spamEmailCount,
+                        };
+                        EmailCarbonFootprintPrinter.printData(emailData);
+                        return [2 /*return*/];
+                }
+            });
         });
-    }); });
-}
-CarbonFootprint();
+    };
+    CarbonFootprintManager.processEmailType = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentials, auth, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 4, , 5]);
+                        return [4 /*yield*/, CarbonFootprintManager.readCredentialsFile()];
+                    case 1:
+                        credentials = _a.sent();
+                        return [4 /*yield*/, CarbonFootprintManager.authorizeGmail(credentials)];
+                    case 2:
+                        auth = _a.sent();
+                        return [4 /*yield*/, CarbonFootprintManager.fetchAndPrintEmailCarbonFootprint(auth)];
+                    case 3:
+                        _a.sent();
+                        return [3 /*break*/, 5];
+                    case 4:
+                        error_1 = _a.sent();
+                        console.error(error_1);
+                        return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CarbonFootprintManager.processServerType = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var numberOfEmail, error_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, ServerEmailInputHandler.getNumberOfEmail()];
+                    case 1:
+                        numberOfEmail = _a.sent();
+                        ServerCarbonFootprintPrinter.printData(numberOfEmail);
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_2 = _a.sent();
+                        console.error(error_2);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CarbonFootprintManager.readCredentialsFile = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        fs.readFile("credentials.json", function (error, credentials) {
+                            if (error) {
+                                reject("Error loading client secret file: ".concat(error));
+                            }
+                            else {
+                                resolve(JSON.parse(credentials.toString()));
+                            }
+                        });
+                    })];
+            });
+        });
+    };
+    CarbonFootprintManager.authorizeGmail = function (credentials) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        GmailAuthenticator.authorize(credentials, function (auth) {
+                            resolve(auth);
+                        });
+                    })];
+            });
+        });
+    };
+    CarbonFootprintManager.getUserInput = function (question) {
+        return __awaiter(this, void 0, void 0, function () {
+            var inputInterface;
+            return __generator(this, function (_a) {
+                inputInterface = readline.createInterface({
+                    input: process.stdin,
+                    output: process.stdout,
+                });
+                return [2 /*return*/, new Promise(function (resolve) {
+                        inputInterface.question(question, function (userInput) {
+                            inputInterface.close();
+                            resolve(userInput);
+                        });
+                    })];
+            });
+        });
+    };
+    CarbonFootprintManager.CarbonFootprint = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var type;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, CarbonFootprintManager.getUserInput("Enter Type (Email/Server): ")];
+                    case 1:
+                        type = _a.sent();
+                        if (!(type.toLowerCase() === "email")) return [3 /*break*/, 3];
+                        return [4 /*yield*/, CarbonFootprintManager.processEmailType()];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 6];
+                    case 3:
+                        if (!(type.toLowerCase() === "server")) return [3 /*break*/, 5];
+                        return [4 /*yield*/, CarbonFootprintManager.processServerType()];
+                    case 4:
+                        _a.sent();
+                        return [3 /*break*/, 6];
+                    case 5:
+                        console.log("Incorrect Input, Please Try Again!");
+                        _a.label = 6;
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return CarbonFootprintManager;
+}());
+CarbonFootprintManager.CarbonFootprint();
