@@ -1,6 +1,6 @@
 import path from "path";
 import google = require("googleapis");
-import { SCOPES } from './scopes';
+import { SCOPES } from "./constants";
 
 import readline = require("readline");
 import fs = require("fs");
@@ -13,7 +13,7 @@ export class GmailLabelCounter {
           userId: "me",
           id: labelId,
         },
-        (error: Error, labelResponse : any) => {
+        (error: Error, labelResponse: any) => {
           if (error) {
             reject(`Error retrieving ${labelId} label: ${error.message}`);
           } else {
@@ -48,7 +48,7 @@ export class GmailAuthenticator {
       client_secret,
       redirect_uris[0]
     );
-    const tokenPath: string = path.join(__dirname ,"token.json");
+    const tokenPath: string = path.join(__dirname, "token.json");
 
     try {
       const token: Buffer = fs.readFileSync(tokenPath);

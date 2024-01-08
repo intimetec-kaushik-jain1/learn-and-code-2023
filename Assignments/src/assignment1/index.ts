@@ -1,4 +1,3 @@
-import  {CarbonFootprintManager}  from "./carbonFootprintManager";
+import { CarbonFootprintManager } from "./carbonFootprintManager";
 
 CarbonFootprintManager.CarbonFootprint();
-

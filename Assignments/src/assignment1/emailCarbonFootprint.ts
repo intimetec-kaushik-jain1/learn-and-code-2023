@@ -1,29 +1,10 @@
+import * as Constants from "./constants";
 export interface EmailCarbonFootprintData {
   emailAddress: string;
   inboxEmailCount: number;
   sentEmailCount: number;
   spamEmailCount: number;
 }
-
-export class EmailCarbonFootprintCalculator {
-  static calculate(
-    inboxCount: number,
-    sentCount: number,
-    spamCount: number
-  ): number {
-    const inboxEmissionRate: number = 0.3;
-    const sentEmissionRate: number = 0.3;
-    const spamEmissionRate: number = 0.03;
-
-    const inboxCarbonFootprint: number =
-      (inboxCount * inboxEmissionRate) / 1000;
-    const sentCarbonFootprint: number = (sentCount * sentEmissionRate) / 1000;
-    const spamCarbonFootprint: number = (spamCount * spamEmissionRate) / 1000;
-
-    return inboxCarbonFootprint + sentCarbonFootprint + spamCarbonFootprint;
-  }
-}
-
 export class EmailCarbonFootprintPrinter {
   static printData(emailData: EmailCarbonFootprintData): void {
     console.log("-------------OUTPUT-------------");
@@ -42,29 +23,23 @@ export class EmailCarbonFootprintPrinter {
     emailData: EmailCarbonFootprintData,
     emailDomain: string
   ): void {
+    const inboxCarbonFootprint: number =
+      (emailData.inboxEmailCount * Constants.INBOX_EMISSION_RATE) /
+      Constants.Gram_To_Kilogram;
+    const sentCarbonFootprint: number =
+      (emailData.sentEmailCount * Constants.SENT_EMISSION_RATE) /
+      Constants.Gram_To_Kilogram;
+    const spamCarbonFootprint: number =
+      (emailData.spamEmailCount * Constants.SPAM_EMISSION_RATE) /
+      Constants.Gram_To_Kilogram;
+
     const totalCarbonFootprint: number =
-      EmailCarbonFootprintCalculator.calculate(
-        emailData.inboxEmailCount,
-        emailData.sentEmailCount,
-        emailData.spamEmailCount
-      );
+      inboxCarbonFootprint + sentCarbonFootprint + spamCarbonFootprint;
 
     console.log("Domain: " + emailDomain);
-    console.log(
-      "Inbox Carbon Footprint: " +
-        (emailData.inboxEmailCount * 0.3) / 1000 +
-        " KG"
-    );
-    console.log(
-      "Sent Carbon Footprint: " +
-        (emailData.sentEmailCount * 0.3) / 1000 +
-        " KG"
-    );
-    console.log(
-      "Spam Carbon Footprint: " +
-        (emailData.spamEmailCount * 0.03) / 1000 +
-        " KG"
-    );
+    console.log("Inbox Carbon Footprint: " + inboxCarbonFootprint + " KG");
+    console.log("Sent Carbon Footprint: " + sentCarbonFootprint + " KG");
+    console.log("Spam Carbon Footprint: " + spamCarbonFootprint + " KG");
     console.log("Total Consumption: " + totalCarbonFootprint + " KG");
   }
 

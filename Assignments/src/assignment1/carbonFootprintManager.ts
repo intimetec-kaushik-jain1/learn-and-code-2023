@@ -1,8 +1,7 @@
-import  {google}  from "googleapis";
+import { google } from "googleapis";
 import readline from "readline";
 import fs from "fs";
 import {
-  EmailCarbonFootprintCalculator,
   EmailCarbonFootprintData,
   EmailCarbonFootprintPrinter,
 } from "./emailCarbonFootprint";
@@ -15,12 +14,23 @@ import { GmailAuthenticator, GmailLabelCounter } from "./gmail";
 import path from "path";
 
 export class CarbonFootprintManager {
-  static async fetchEmailStatistics(auth: any): Promise<EmailCarbonFootprintData> {
+  static async fetchEmailStatistics(
+    auth: any
+  ): Promise<EmailCarbonFootprintData> {
     const gmail: any = google.gmail({ version: "v1", auth });
-    const inboxEmailCount: number = await GmailLabelCounter.getCount(gmail, "INBOX");
-    const sentEmailCount: number = await GmailLabelCounter.getCount(gmail, "SENT");
-    const spamEmailCount: number = await GmailLabelCounter.getCount(gmail, "SPAM");
-  
+    const inboxEmailCount: number = await GmailLabelCounter.getCount(
+      gmail,
+      "INBOX"
+    );
+    const sentEmailCount: number = await GmailLabelCounter.getCount(
+      gmail,
+      "SENT"
+    );
+    const spamEmailCount: number = await GmailLabelCounter.getCount(
+      gmail,
+      "SPAM"
+    );
+
     return {
       emailAddress: "kaushikjain67890@gmail.com",
       inboxEmailCount,
@@ -28,7 +38,7 @@ export class CarbonFootprintManager {
       spamEmailCount,
     };
   }
-  
+
   static async fetchAndPrintEmailCarbonFootprint(auth: any): Promise<void> {
     const emailData = await CarbonFootprintManager.fetchEmailStatistics(auth);
     EmailCarbonFootprintPrinter.printData(emailData);
@@ -55,13 +65,16 @@ export class CarbonFootprintManager {
 
   static async readCredentialsFile(): Promise<any> {
     return new Promise((resolve, reject) => {
-      fs.readFile(path.join(  __dirname , "credentials.json"), (error: Error | null, credentials:any) => {
-        if (error) {
-          reject(`Error loading client secret file: ${error}`);
-        } else {
-          resolve(JSON.parse(credentials.toString()));
+      fs.readFile(
+        path.join(__dirname, "credentials.json"),
+        (error: Error | null, credentials: any) => {
+          if (error) {
+            reject(`Error loading client secret file: ${error}`);
+          } else {
+            resolve(JSON.parse(credentials.toString()));
+          }
         }
-      });
+      );
     });
   }
 

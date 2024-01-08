@@ -1,8 +1,9 @@
 import readline = require("readline");
+import { SERVER_EMISSION_RATE } from "./constants";
 
 export class ServerCarbonFootprintCalculator {
   static calculate(numberOfEmail: number): number {
-    return numberOfEmail * 0.02;
+    return numberOfEmail * SERVER_EMISSION_RATE;
   }
 }
 export class ServerCarbonFootprintPrinter {
