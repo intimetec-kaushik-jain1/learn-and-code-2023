@@ -1,1 +1,4 @@
-console.log("Hi");
+import  {CarbonFootprintManager}  from "./carbonFootprintManager";
+
+CarbonFootprintManager.CarbonFootprint();
+
