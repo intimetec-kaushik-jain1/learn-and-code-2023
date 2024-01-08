@@ -1,0 +1,27 @@
+{
+  "name": "learn-and-code-assignments",
+  "version": "1.0.0",
+  "description": "\"All the assignments of L&C would be submitted here\"",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/assignment1/index.ts",
+    "start:dev": "npx tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intimetec-kaushik-jain1/learn-and-code-2023.git"
+  },
+  "author": "Kaushik",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/intimetec-kaushik-jain1/learn-and-code-2023/issues"
+  },
+  "homepage": "https://github.com/intimetec-kaushik-jain1/learn-and-code-2023#readme",
+  "devDependencies": {
+    "@types/node": "^20.10.7",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
