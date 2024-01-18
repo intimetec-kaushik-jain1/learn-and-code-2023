@@ -1,7 +1,6 @@
 import path from "path";
 import google = require("googleapis");
 import { SCOPES } from "./constants";
-
 import readline = require("readline");
 import fs = require("fs");
 
@@ -60,6 +59,7 @@ export class GmailAuthenticator {
       });
     }
   }
+
   static getAccessToken(
     oAuth2Client: any,
     callback: (auth: any) => void

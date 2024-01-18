@@ -19,6 +19,16 @@ export class EmailCarbonFootprintPrinter {
     }
   }
 
+  static extractEmailDomain(emailAddress: string): string {
+    const emailDomain: string = emailAddress.split("@")[1]?.split(".")[0];
+    const validDomains: string[] = ["gmail", "outlook", "yahoo"];
+
+    if (validDomains.includes(emailDomain)) {
+      return emailDomain;
+    }
+    return "Invalid Domain";
+  }
+
   static printValidEmailData(
     emailData: EmailCarbonFootprintData,
     emailDomain: string
@@ -45,15 +55,5 @@ export class EmailCarbonFootprintPrinter {
 
   static printInvalidEmail(): void {
     console.log("Invalid email");
-  }
-
-  static extractEmailDomain(emailAddress: string): string {
-    const emailDomain: string = emailAddress.split("@")[1]?.split(".")[0];
-    const validDomains: string[] = ["gmail", "outlook", "yahoo"];
-
-    if (validDomains.includes(emailDomain)) {
-      return emailDomain;
-    }
-    return "Invalid Domain";
   }
 }
