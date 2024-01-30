@@ -1,28 +1,12 @@
 import readline from "readline";
-import {
-  DIGITS_OF_KAPREKAR_CONSTANT,
-  EXCEPETION_1111,
-  INITIAL_NUMBER_OF_ITERATION,
-  KAPREKAR_CONSTANT,
-  KAPREKAR_LOWER_LIMIT,
-  KAPREKAR_UPPER_LIMIT,
-  ONE,
-  ZERO,
-} from "./contants";
+import Constants from "./constants";
 
 export class KaprekarRoutine {
+  static inputNumber: number = 0;
+  
   static async findKaprekarIterations() {
-    const startingNumber: number = parseInt(
-      await this.getUserInput("Enter a number: ")
-    );
-    !this.is1111ExceptionInput(startingNumber)
-      ? this.validateInput(startingNumber)
-        ? console.log(
-            "Number of Iterations: " +
-              this.calculateNumberOfIterations(startingNumber)
-          )
-        : console.log("Invalid Input")
-      : console.log("Exception Input");
+    this.inputNumber = parseInt(await this.getUserInput("Enter a number: "));
+    this.printOutput();
   }
 
   static async getUserInput(question: string): Promise<string> {
@@ -38,37 +22,37 @@ export class KaprekarRoutine {
     });
   }
 
-  static is1111ExceptionInput(startingNumber: number) {
-    return startingNumber === EXCEPETION_1111 ? true : false;
+  static is1111ExceptionInput(inputNumber: number) {
+    return inputNumber === Constants.EXCEPTION_1111 ? true : false;
   }
 
   static validateInput(input: number): boolean {
     return (
-      input >= KAPREKAR_LOWER_LIMIT &&
-      input <= KAPREKAR_UPPER_LIMIT &&
+      input >= Constants.KAPREKAR_LOWER_LIMIT &&
+      input <= Constants.KAPREKAR_UPPER_LIMIT &&
       !isNaN(input)
     );
   }
 
-  static calculateNumberOfIterations(startingNumber: number): number {
+  static calculateNumberOfIterations(inputNumber: number): number {
     let numberOfIterations: number = 0;
-    let currentNumber = startingNumber;
-    while (currentNumber !== KAPREKAR_CONSTANT) {
+    let currentNumber = inputNumber;
+    while (currentNumber !== Constants.KAPREKAR_CONSTANT) {
       currentNumber = parseInt(this.addLeadingZeroes(currentNumber.toString()));
       currentNumber =
         this.getOrderedNumber(currentNumber.toString(), "descending") -
         this.getOrderedNumber(currentNumber.toString(), "ascending");
-      numberOfIterations = numberOfIterations + ONE;
+      numberOfIterations = numberOfIterations + Constants.ONE;
     }
     return numberOfIterations;
   }
 
   static addLeadingZeroes(userInput: string): string {
     const zerosToAdd = Math.max(
-      ZERO,
-      DIGITS_OF_KAPREKAR_CONSTANT - userInput.length
+      Constants.ZERO,
+      Constants.DIGITS_OF_KAPREKAR_CONSTANT - userInput.length
     );
-    for (let i = INITIAL_NUMBER_OF_ITERATION; i < zerosToAdd; i++) {
+    for (let i = Constants.INITIAL_NUMBER_OF_ITERATION; i < zerosToAdd; i++) {
       userInput = userInput + "0";
     }
     return userInput;
@@ -94,6 +78,17 @@ export class KaprekarRoutine {
       );
       return descendingNumber;
     }
+  }
+
+  static printOutput() {
+    return !this.is1111ExceptionInput(this.inputNumber)
+      ? this.validateInput(this.inputNumber)
+        ? console.log(
+            "Number of Iterations: " +
+              this.calculateNumberOfIterations(this.inputNumber)
+          )
+        : console.log("Invalid Input")
+      : console.log("Exception Input");
   }
 }
 
