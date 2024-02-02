@@ -85,9 +85,10 @@ export class GmailAuthenticator {
             console.error("Error retrieving access token:", error);
             return;
           }
+          const filePath = path.join(__dirname, "assignment1", "token.json");
 
           oAuth2Client.setCredentials(token);
-          fs.writeFileSync("token.json", JSON.stringify(token));
+          fs.writeFileSync(filePath, JSON.stringify(token));
           callback(oAuth2Client);
         });
       }

@@ -4,5 +4,4 @@ dist
 /dist
 *.log
 *.js
-*.json
 package-lock.json

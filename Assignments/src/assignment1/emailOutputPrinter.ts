@@ -5,17 +5,17 @@ export interface EmailCarbonFootprintData {
   sentEmailCount: number;
   spamEmailCount: number;
 }
-export class EmailCarbonFootprintPrinter {
+export class OutputPrinter {
   static printData(emailData: EmailCarbonFootprintData): void {
     console.log("-------------OUTPUT-------------");
-    const emailDomain: string = EmailCarbonFootprintPrinter.extractEmailDomain(
+    const emailDomain: string = this.extractEmailDomain(
       emailData.emailAddress
     );
 
     if (emailDomain !== "Invalid Domain") {
-      EmailCarbonFootprintPrinter.printValidEmailData(emailData, emailDomain);
+      this.printValidEmailData(emailData, emailDomain);
     } else {
-      EmailCarbonFootprintPrinter.printInvalidEmail();
+      this.printInvalidEmail();
     }
   }
 
