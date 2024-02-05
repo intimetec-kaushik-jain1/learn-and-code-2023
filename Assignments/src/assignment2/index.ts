@@ -1,37 +1,13 @@
-import readline from "readline";
 import Constants from "./constants";
+import { Output } from "./output";
+import { Input } from "./input";
 
 export class KaprekarRoutine {
   static inputNumber: number = 0;
-  
+
   static async findKaprekarIterations() {
-    this.inputNumber = parseInt(await this.getUserInput("Enter a number: "));
-    this.printOutput();
-  }
-
-  static async getUserInput(question: string): Promise<string> {
-    const inputInterface = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    return new Promise((resolve) => {
-      inputInterface.question(question, (userInput: string) => {
-        inputInterface.close();
-        resolve(userInput);
-      });
-    });
-  }
-
-  static is1111ExceptionInput(inputNumber: number) {
-    return inputNumber === Constants.EXCEPTION_1111 ? true : false;
-  }
-
-  static validateInput(input: number): boolean {
-    return (
-      input >= Constants.KAPREKAR_LOWER_LIMIT &&
-      input <= Constants.KAPREKAR_UPPER_LIMIT &&
-      !isNaN(input)
-    );
+    this.inputNumber = parseInt(await Input.getUserInput("Enter a number: "));
+    Output.printOutput();
   }
 
   static calculateNumberOfIterations(inputNumber: number): number {
@@ -80,16 +56,6 @@ export class KaprekarRoutine {
     }
   }
 
-  static printOutput() {
-    return !this.is1111ExceptionInput(this.inputNumber)
-      ? this.validateInput(this.inputNumber)
-        ? console.log(
-            "Number of Iterations: " +
-              this.calculateNumberOfIterations(this.inputNumber)
-          )
-        : console.log("Invalid Input")
-      : console.log("Exception Input");
-  }
 }
 
 KaprekarRoutine.findKaprekarIterations();
