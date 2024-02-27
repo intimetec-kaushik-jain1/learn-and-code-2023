@@ -1,0 +1,4 @@
+ a blueprint can refer to an interface, abstract class, or other constructs that define the structure and 
+ behavior of objects. It specifies what methods or properties an object should have, without providing the 
+ actual implementation details. This allows different classes or objects to adhere to the same blueprint while 
+ providing their own unique implementations.
