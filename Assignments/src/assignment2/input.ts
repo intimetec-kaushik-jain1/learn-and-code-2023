@@ -1,7 +1,15 @@
 import readline from "readline";
 
-export class Input {
-  static async getUserInput(question: string): Promise<string> {
+export interface UserInput {
+  getUserInput(question: string): Promise<string>;
+}
+
+export abstract class AbstractInput implements UserInput {
+  abstract getUserInput(question: string): Promise<string>;
+}
+
+export class Input implements AbstractInput {
+  async getUserInput(question: string): Promise<string> {
     const inputInterface = readline.createInterface({
       input: process.stdin,
       output: process.stdout,

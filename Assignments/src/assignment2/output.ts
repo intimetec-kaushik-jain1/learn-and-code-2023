@@ -1,17 +1,25 @@
-import { KaprekarRoutine } from ".";
-import { Validator } from "./validator";
+export interface OutputPrinter {
+  printErrorOutput(areAllDigitsSame: boolean, isInputValid: boolean): void;
+  printIterationOutput(numberOfIterations: number): void;
+}
 
-export class Output {
-  static printOutput() {
-    return !Validator.areAllDigitsSame(KaprekarRoutine.inputNumber)
-      ? Validator.validateInput(KaprekarRoutine.inputNumber)
-        ? console.log(
-          "Number of Iterations: " +
-              KaprekarRoutine.calculateNumberOfIterations(
-                KaprekarRoutine.inputNumber
-              )
-        )
-        : console.log("Invalid Input")
-      : console.log("All Digits are same, Please Try with some other Input!");
+export abstract class AbstractOutput implements OutputPrinter {
+  abstract printErrorOutput(
+    areAllDigitsSame: boolean,
+    isInputValid: boolean
+  ): void;
+  abstract printIterationOutput(numberOfIterations: number): void;
+}
+
+export class Output implements AbstractOutput {
+  printErrorOutput(areAllDigitsSame: boolean, isInputValid: boolean): void {
+    if (areAllDigitsSame === true) {
+      console.log("All Digits are same, Please Try with some other Input!");
+    } else if (!isInputValid) {
+      console.log("Invalid Input");
+    }
+  }
+  printIterationOutput(numberOfIterations: number): void {
+    console.log("Number of Iterations: " + numberOfIterations);
   }
 }

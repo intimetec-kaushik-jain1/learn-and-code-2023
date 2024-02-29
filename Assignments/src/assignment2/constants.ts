@@ -4,8 +4,6 @@ const Constants = {
   KAPREKAR_UPPER_LIMIT: 9999,
   INITIAL_NUMBER_OF_ITERATION: 0,
   DIGITS_OF_KAPREKAR_CONSTANT: 4,
-  ZERO: 0,
-  ONE: 1,
 };
 
 export default Constants;
