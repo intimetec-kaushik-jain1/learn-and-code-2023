@@ -1,46 +1,38 @@
+import express = require("express");
+import bodyParser = require("body-parser");
+import path = require("path");
 import { SignupAPI } from "./APIModule/signupAPI";
-import { FormValidator } from "./ValidationModule/formValidator";
-import { User } from "./UserModule/user";
-import dotenv = require("dotenv");
-import { RESPONSE_MESSAGE } from "./utils/contants";
-import { UserRole } from "./utils/Interfaces";
-class UserSignupProcess {
-  constructor() {
-    dotenv.config();
-  }
 
-  async initiateSignupProcess() {
-    try {
-      const user = this.createUser();
-      this.validateUser(user);
-      await this.signUpUser(user);
-    } catch (error) {
-      console.error(RESPONSE_MESSAGE.signupFailure, error);
-    }
-  }
+const app = express();
+const port = 3000;
 
-  private createUser(): User {
-    const user = new User();
-    user.name = "tike ow";
-    user.email = "tikewow407@azduan.com";
-    user.password = "123445";
-    user.role = "user";
-    return user;
-  }
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-  private validateUser(user: User): void {
-    const errors = FormValidator.getValidationErrors(user);
-    if (errors.length > 0) {
-      FormValidator.printValidationError(user);
-      throw new Error("Validation failed");
-    }
-  }
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "/public/signupForm.html"));
+});
 
-  private async signUpUser(user: User): Promise<void> {
-    const signupAPI = new SignupAPI();
-    await signupAPI.signup(user);
-  }
-}
+app.get("/signupForm.css", (req, res) => {
+  res.sendFile(path.join(__dirname, "/public/signupForm.css"), {
+    headers: {
+      "Content-Type": "text/css",
+    },
+  });
+});
 
-const userSignupProcess = new UserSignupProcess();
-userSignupProcess.initiateSignupProcess();
+app.post("/submit", async (req, res) => {
+  const userData = req.body;
+  const signupAPI = new SignupAPI();
+  try {
+    await signupAPI.signup(userData);
+    res.sendFile(path.join(__dirname, "public", "submit.html"));
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

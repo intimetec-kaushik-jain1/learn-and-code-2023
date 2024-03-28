@@ -3,7 +3,9 @@ import { UserRequest } from "./Interfaces";
 import { RESPONSE_MESSAGE } from "./contants";
 
 export async function setDBConnection() {
-  const client = new MongoClient("mongodb+srv://kaushikjain1111:Pyan5VPslEbogYBo@signupapi.b4iwoxe.mongodb.net/");
+  const client = new MongoClient(
+    "mongodb+srv://kaushikjain1111:Pyan5VPslEbogYBo@signupapi.b4iwoxe.mongodb.net/"
+  );
   await client.connect();
   return client;
 }
@@ -22,7 +24,7 @@ export async function isUserAlreadyExist(user: UserRequest) {
 
   try {
     const existingUser = await collection.findOne({ email: user.email });
-    return !!existingUser;
+    return existingUser;
   } catch (error) {
     console.error(RESPONSE_MESSAGE.errorFindingUser, ":", error);
     return false;

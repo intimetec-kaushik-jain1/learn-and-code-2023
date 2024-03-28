@@ -1,31 +1,32 @@
 import { UserRequest } from "../utils/Interfaces";
 import * as fs from "fs";
 import * as path from "path";
-import { isUserAlreadyExist } from "../utils/utils";
 import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/contants";
 export class DirectoryManager {
   private userDataPath: string = "";
-  async createDirectory(user: UserRequest): Promise<void> {
+  async createUserFileInDirectory(user: UserRequest): Promise<string> {
     try {
-      if (await isUserAlreadyExist(user)) {
-        return;
-      }
       this.userDataPath = path.join(__dirname, "..", CONSTANTS.usersDataFolder);
-      // Create a directory for userData if it does not exist
+      // Create a directory for Users-Data if it does not exist
       if (!fs.existsSync(this.userDataPath)) {
         fs.mkdirSync(this.userDataPath);
         console.log(RESPONSE_MESSAGE.directoryCreationSuccess);
       }
-      this.writeUserDataToFile(user);
+      return this.writeUserDataToFile(user);
     } catch (error) {
-      console.error(RESPONSE_MESSAGE.directoryCreationFailure, error);
+      return RESPONSE_MESSAGE.directoryCreationFailure;
     }
   }
 
-  writeUserDataToFile(user: any) {
+  writeUserDataToFile(user: any): string {
+    try {
     const userFilePath = path.join(this.userDataPath, `${user.email}.json`);
     const userData = JSON.stringify(user, null, 2);
     fs.writeFileSync(userFilePath, userData);
-    console.log(`${user.email} - ${RESPONSE_MESSAGE.fileCreationSuccess}`);
+    return `${user.email} - ${RESPONSE_MESSAGE.fileCreationSuccess}`;
+  }
+  catch{ 
+    return `${user.email} - ${RESPONSE_MESSAGE.fileCreationFailure}`;
+    }
   }
 }

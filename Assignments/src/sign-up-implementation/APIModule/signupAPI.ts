@@ -21,13 +21,30 @@ export class SignupAPI {
       if (await isUserAlreadyExist(user)) {
         console.log(RESPONSE_MESSAGE.userAlreadyExist);
         return;
+      } else {
+        await this.createUser(user);
+        await this.createUserFileInDirectory(user);
+        this.notifier.notifyRegisterSuccess(user);
+        this.user.populateDefaultData(user.role);
+        return;
       }
-      this.user.createUser(user);
-      this.notifier.notifyLoginSuccess(user);
-      this.user.populateDefaultData(user.role);
-      this.directoryManager.createDirectory(user);
     } catch (error: any) {
-      this.notifier.notifyLoginFailure(user, error.message);
+      this.notifier.notifyRegisterFailure(user, error.message);
     }
+  }
+
+  private async createUser(user: UserRequest): Promise<void> {
+    const userCreationResult = await this.user.createUser(user);
+    if (userCreationResult !== RESPONSE_MESSAGE.userCreationSuccess) {
+      console.error("User creation failed:", userCreationResult);
+    } else {
+      console.log(RESPONSE_MESSAGE.userCreationSuccess);
+    }
+  }
+
+  private async createUserFileInDirectory(user: UserRequest): Promise<void> {
+    const fileCreationResult =
+      await this.directoryManager.createUserFileInDirectory(user);
+    console.log(fileCreationResult);
   }
 }

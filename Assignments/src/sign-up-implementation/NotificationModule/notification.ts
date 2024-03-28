@@ -1,7 +1,6 @@
 import nodemailer = require("nodemailer");
 import { Transporter } from "nodemailer";
 import { UserRequest } from "../utils/Interfaces";
-import { isUserAlreadyExist } from "../utils/utils";
 import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/contants";
 
 export class Notifier {
@@ -9,21 +8,22 @@ export class Notifier {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT!),
-      secure: Boolean(process.env.SMTP_SECURE),
-      service: process.env.SMTP_SERVICE!,
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      service: "gmail",
       auth: {
-        user: process.env.SMTP_MAIL!,
-        pass: process.env.SMTP_PASS!,
+        user: "kaushikjain67890@gmail.com",
+        pass: "tbbliotchakhangs",
       },
+      debug: true,
     });
   }
 
   private async sendEmail(to: string, subject: string, text: string) {
     try {
       await this.transporter.sendMail({
-        from: process.env.SMTP_MAIL!,
+        from: "kaushikjain67890@gmail.com",
         to,
         subject,
         text,
@@ -35,18 +35,15 @@ export class Notifier {
     }
   }
 
-  async notifyLoginFailure(user: UserRequest, errorMessage: string) {
-    if (await isUserAlreadyExist(user)) {
-      return;
-    }
-    const subject = RESPONSE_MESSAGE.loginFailure;
+  async notifyRegisterFailure(user: UserRequest, errorMessage: string) {
+    const subject = RESPONSE_MESSAGE.registerFailure;
     const text = `${CONSTANTS.Dear} ${user.name}, ${RESPONSE_MESSAGE.contactSupportMessage},\n\n  ${CONSTANTS.Error}: ${errorMessage}`;
     await this.sendEmail(user.email, subject, text);
   }
 
-  async notifyLoginSuccess(user: UserRequest) {
-    const subject = RESPONSE_MESSAGE.loginSuccess;
-    const text = `${CONSTANTS.Dear} ${user.name},${RESPONSE_MESSAGE.loginSuccessfulMessage}\n\n ${RESPONSE_MESSAGE.thankYou}`;
+  async notifyRegisterSuccess(user: UserRequest) {
+    const subject = RESPONSE_MESSAGE.registerSuccess;
+    const text = `${CONSTANTS.Dear} ${user.name},${RESPONSE_MESSAGE.registerSuccessfulMessage}\n\n ${RESPONSE_MESSAGE.thankYou}`;
     await this.sendEmail(user.email, subject, text);
     console.log(RESPONSE_MESSAGE.signupSuccess);
   }
