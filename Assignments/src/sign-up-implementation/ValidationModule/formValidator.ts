@@ -1,7 +1,7 @@
 import { Validator } from "validator.ts/Validator";
 import { UserRequest } from "../utils/Interfaces";
 import { ValidationErrorInterface } from "validator.ts/ValidationErrorInterface";
-import { CONSTANTS } from "../utils/contants";
+import { CONSTANTS } from "../utils/constants";
 
 export class FormValidator {
   static getValidationErrors(user: UserRequest): ValidationErrorInterface[] {

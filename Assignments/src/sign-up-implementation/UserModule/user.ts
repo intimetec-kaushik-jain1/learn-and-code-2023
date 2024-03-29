@@ -1,6 +1,6 @@
 import { UserRequest, UserRole } from "../utils/Interfaces";
-import { getCollection } from "../utils/utils";
-import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/contants";
+import { getDBConnection } from "../utils/utilsOCPLearning";
+import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/constants";
 export class User implements UserRequest {
   name!: string;
   password!: string;
@@ -10,7 +10,8 @@ export class User implements UserRequest {
 
   async createUser(user: UserRequest): Promise<string> {
     try {
-      const collection = await getCollection()
+      const dbConnection = await getDBConnection();
+      const collection = await dbConnection.getCollection();
       await collection.insertOne(user);
       return RESPONSE_MESSAGE.userCreationSuccess;
     } catch (error) {

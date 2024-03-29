@@ -3,7 +3,12 @@ import { Transporter } from "nodemailer";
 import { UserRequest } from "../utils/Interfaces";
 import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/constants";
 
-export class Notifier {
+interface NotificationService {
+  notifyRegisterFailure(user: UserRequest, errorMessage: string): any;
+  notifyRegisterSuccess(user: UserRequest, successMessage?: string): any; // successMessage is optional
+}
+
+class EmailNotificationService implements NotificationService {
   private transporter!: Transporter;
 
   constructor() {
@@ -47,4 +52,17 @@ export class Notifier {
     await this.sendEmail(user.email, subject, text);
     console.log(RESPONSE_MESSAGE.signupSuccess);
   }
+}
+
+// Text Message Implementation (for future use)
+
+class TextNotificationService implements NotificationService {
+  notifyRegisterFailure(): any {}
+  notifyRegisterSuccess(): any {}
+}
+
+// Function to initialize and return the appropriate notifiy instance
+export async function Notifier() {
+  const emailNotificationService = new EmailNotificationService();
+  return emailNotificationService;
 }

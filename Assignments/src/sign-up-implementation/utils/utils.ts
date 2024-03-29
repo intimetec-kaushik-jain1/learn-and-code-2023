@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { UserRequest } from "./Interfaces";
-import { RESPONSE_MESSAGE } from "./contants";
+import { RESPONSE_MESSAGE } from "./constants";
 
 export async function setDBConnection() {
   const client = new MongoClient(

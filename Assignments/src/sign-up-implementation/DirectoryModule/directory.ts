@@ -1,7 +1,7 @@
 import { UserRequest } from "../utils/Interfaces";
 import * as fs from "fs";
 import * as path from "path";
-import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/contants";
+import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/constants";
 export class DirectoryManager {
   private userDataPath: string = "";
   async createUserFileInDirectory(user: UserRequest): Promise<string> {
