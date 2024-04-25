@@ -6,3 +6,5 @@ dist
 *.json
 .env
 /Users-Data
+temp.ts
+*.js
