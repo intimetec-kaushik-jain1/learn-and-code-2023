@@ -4,6 +4,7 @@ import * as path from "path";
 import { CONSTANTS, RESPONSE_MESSAGE } from "../utils/constants";
 export class DirectoryManager {
   private userDataPath: string = "";
+
   async createUserFileInDirectory(user: UserRequest): Promise<string> {
     try {
       this.userDataPath = path.join(__dirname, "..", CONSTANTS.usersDataFolder);
@@ -18,15 +19,14 @@ export class DirectoryManager {
     }
   }
 
-  writeUserDataToFile(user: any): string {
+  writeUserDataToFile(user: UserRequest): string {
     try {
-    const userFilePath = path.join(this.userDataPath, `${user.email}.json`);
-    const userData = JSON.stringify(user, null, 2);
-    fs.writeFileSync(userFilePath, userData);
-    return `${user.email} - ${RESPONSE_MESSAGE.fileCreationSuccess}`;
-  }
-  catch{ 
-    return `${user.email} - ${RESPONSE_MESSAGE.fileCreationFailure}`;
+      const userFilePath = path.join(this.userDataPath, `${user.email}.json`);
+      const userData = JSON.stringify(user, null, 2);
+      fs.writeFileSync(userFilePath, userData);
+      return `${user.email} - ${RESPONSE_MESSAGE.fileCreationSuccess}`;
+    } catch {
+      return `${user.email} - ${RESPONSE_MESSAGE.fileCreationFailure}`;
     }
   }
 }

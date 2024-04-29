@@ -1,50 +1,51 @@
 import { User } from "../UserModule/user";
 import { UserRequest } from "../utils/Interfaces";
 import { DirectoryManager } from "../DirectoryModule/directory";
-import { Notifier } from "../NotificationModule/notificationOCPLearning";
-import { getDBConnection } from "../utils/utilsOCPLearning";
 import { RESPONSE_MESSAGE } from "../utils/constants";
+import {
+  Notification,
+  NotificationService,
+} from "../NotificationModule/notificationOCP";
 
 export class SignupAPI {
   private user: User;
-  private directoryManager: DirectoryManager;
+  private directoryManager!: DirectoryManager;
+  private notification: NotificationService;
+  private messages: string[] = [];
 
   constructor() {
     this.user = new User();
-    this.directoryManager = new DirectoryManager();
+    this.notification = new Notification().getNotificationService();
   }
 
   async signup(user: UserRequest): Promise<void> {
-    const notifier = await Notifier();
+    let message = "";
     try {
-      const dbConnection = await getDBConnection();
-      if (await dbConnection.isUserAlreadyExist(user)) {
-        console.log(RESPONSE_MESSAGE.userAlreadyExist);
-        return;
+      let isUserExisted: string = await this.user.isUserAlreadyExist(user);
+
+      if (isUserExisted == RESPONSE_MESSAGE.userFindSuccess) {
+        message = await this.notification.sendRegisterFailureMail(user);
+        this.messages.push(message);
       } else {
-        await this.createUser(user);
-        await this.createUserFileInDirectory(user);
-        notifier.notifyRegisterSuccess(user);
-        this.user.populateDefaultData(user.role);
-        return;
+        // user exist, now perform all operations :
+        this.directoryManager = new DirectoryManager();
+
+        message = await this.user.createUser(user);
+        this.messages.push(message);
+
+        message = await this.user.populateDefaultData(user.role);
+        this.messages.push(message);
+
+        message = await this.directoryManager.createUserFileInDirectory(user);
+        this.messages.push(message);
+
+        message = await this.notification.sendRegisterSuccessMail(user);
+        this.messages.push(message);
       }
+      console.log(this.messages);
+      return;
     } catch (error: any) {
-      notifier.notifyRegisterFailure(user, error.message);
+      throw error;
     }
-  }
-
-  private async createUser(user: UserRequest): Promise<void> {
-    const userCreationResult = await this.user.createUser(user);
-    if (userCreationResult !== RESPONSE_MESSAGE.userCreationSuccess) {
-      console.error("User creation failed:", userCreationResult);
-    } else {
-      console.log(RESPONSE_MESSAGE.userCreationSuccess);
-    }
-  }
-
-  private async createUserFileInDirectory(user: UserRequest): Promise<void> {
-    const fileCreationResult =
-      await this.directoryManager.createUserFileInDirectory(user);
-    console.log(fileCreationResult);
   }
 }

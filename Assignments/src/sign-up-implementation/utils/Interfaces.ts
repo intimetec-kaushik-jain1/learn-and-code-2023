@@ -4,6 +4,9 @@ export interface UserRequest {
   password: string;
   confirmPassword: string;
   role: UserRole;
+  createUser(user: UserRequest): Promise<string>;
+  populateDefaultData(userRole: UserRole): Promise<string>;
+  isUserAlreadyExist(user: UserRequest): Promise<string>;
 }
 
 export interface UserResponse extends UserRequest {

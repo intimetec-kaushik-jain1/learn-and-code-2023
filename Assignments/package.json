@@ -5,9 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node src/sign-up-implementation/SignupForm/signupForm.ts",
-    "start:dev": "npx tsc",
-    "build": "npx tsc",
+    "start": "node src/sign-up-implementation/dist/index.js",
+    "build": "tsc src/sign-up-implementation/index.ts --outDir dist",
     "type": "module"
   },
   "repository": {
