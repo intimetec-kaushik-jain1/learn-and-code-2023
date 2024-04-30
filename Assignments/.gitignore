@@ -4,3 +4,7 @@ dist
 /dist
 *.log
 *.json
+.env
+/Users-Data
+temp.ts
+*.js
