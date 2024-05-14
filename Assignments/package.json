@@ -5,8 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/sign-up-implementation/dist/index.js",
-    "build": "tsc src/sign-up-implementation/index.ts --outDir dist",
+    "start": "node dist/sign-up-implementation",
+    "build": "tsc --outDir dist",
     "type": "module"
   },
   "repository": {

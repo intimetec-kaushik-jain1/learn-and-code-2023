@@ -7,7 +7,11 @@ export class DirectoryManager {
 
   async createUserFileInDirectory(user: UserRequest): Promise<string> {
     try {
-      this.userDataPath = path.join(__dirname, "..", CONSTANTS.usersDataFolder);
+      this.userDataPath = path.join(
+        __dirname,
+        "../../../public",
+        CONSTANTS.usersDataFolder
+      );
       // Create a directory for Users-Data if it does not exist
       if (!fs.existsSync(this.userDataPath)) {
         fs.mkdirSync(this.userDataPath);

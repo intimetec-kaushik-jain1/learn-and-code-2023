@@ -14,7 +14,7 @@ export class User implements UserRequest {
     this.dbConnection = new DBConnection().getDbConnectionService();
   }
 
-  async createUser(user: UserRequest): Promise<string> {
+  async createUser(user: any): Promise<any> {
     try {
       const result = await (
         await this.dbConnection.getCollection()
