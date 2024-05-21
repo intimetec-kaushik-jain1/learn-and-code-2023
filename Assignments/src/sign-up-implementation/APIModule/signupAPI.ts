@@ -44,7 +44,7 @@ export class SignupAPI {
       }
       console.log(this.messages);
       return;
-    } catch (error: any) {
+    } catch (error:any) {
       throw error;
     }
   }

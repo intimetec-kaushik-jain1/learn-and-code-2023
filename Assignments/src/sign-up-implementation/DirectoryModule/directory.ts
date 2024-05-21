@@ -12,6 +12,7 @@ export class DirectoryManager {
         "../../../public",
         CONSTANTS.usersDataFolder
       );
+
       // Create a directory for Users-Data if it does not exist
       if (!fs.existsSync(this.userDataPath)) {
         fs.mkdirSync(this.userDataPath);
@@ -19,7 +20,10 @@ export class DirectoryManager {
       }
       return this.writeUserDataToFile(user);
     } catch (error) {
-      return RESPONSE_MESSAGE.directoryCreationFailure;
+      const directoryError = new Error(
+        RESPONSE_MESSAGE.directoryCreationFailure
+      );
+      throw directoryError;
     }
   }
 
@@ -29,8 +33,9 @@ export class DirectoryManager {
       const userData = JSON.stringify(user, null, 2);
       fs.writeFileSync(userFilePath, userData);
       return `${user.email} - ${RESPONSE_MESSAGE.fileCreationSuccess}`;
-    } catch {
-      return `${user.email} - ${RESPONSE_MESSAGE.fileCreationFailure}`;
+    } catch (error) {
+      const fileCreateError = new Error(RESPONSE_MESSAGE.fileCreationFailure);
+      throw fileCreateError;
     }
   }
 }

@@ -14,9 +14,10 @@ export interface NotificationService {
     successMessage?: string
   ): Promise<string>; // successMessage is optional
 }
+
 // Email Message Implementation
 export class EmailNotification implements NotificationService {
-  private transporter!: Transporter;
+  private transporter: Transporter;
 
   constructor() {
     this.transporter = nodemailer.createTransport({
@@ -57,7 +58,7 @@ export class EmailNotification implements NotificationService {
 
   public async sendRegisterSuccessMail(
     user: UserRequest,
-    successMessage: string
+    successMessage?: string
   ): Promise<string> {
     const subject = RESPONSE_MESSAGE.registerSuccessMailSubject;
     const text = `${CONSTANTS.Dear} ${user.name},${RESPONSE_MESSAGE.registerSuccessfulMessage}\n\n ${RESPONSE_MESSAGE.thankYou}`;
@@ -70,37 +71,38 @@ export class EmailNotification implements NotificationService {
 export class TextNotification implements NotificationService {
   async sendRegisterFailureMail(
     user: UserRequest,
-    successMessage: string
+    errorMessage?: string
   ): Promise<string> {
-    return "needs Implementation";
+    // Placeholder implementation
+    return "Text message sending for failure needs implementation";
   }
+
   async sendRegisterSuccessMail(
     user: UserRequest,
-    errorMessage: string
+    successMessage?: string
   ): Promise<string> {
-    return "needs Implementation";
+    // Placeholder implementation
+    return "Text message sending for success needs implementation";
   }
 }
 
+// Notification Wrapper Implementation
 export class Notification {
-  private notificationService!: NotificationService;
+  private notificationService: NotificationService;
 
-  constructor() {
-    this.setNotificationService();
+  constructor(notificationType?: string) {
+    this.notificationService = this.createNotificationService(notificationType);
   }
 
-  public getNotificationService() {
+  public getNotificationService(): NotificationService {
     return this.notificationService;
   }
 
-  private setNotificationService(notificationType?: string): void {
-    let notificationObject: NotificationService;
-    if (notificationType == "text") {
-      notificationObject = new TextNotification();
+  private createNotificationService(notificationType?: string): NotificationService {
+    if (notificationType === "text") {
+      return new TextNotification();
     } else {
-      notificationObject = new EmailNotification();
+      return new EmailNotification();
     }
-
-    this.notificationService = notificationObject;
   }
 }
